@@ -1,0 +1,99 @@
+import java.util.*;
+
+public class OptimizedHeapMinPQ<T> implements ExtrinsicMinPQ<T> {
+    private List<PriorityNode<T>> items;
+    private Map<T, Integer> itemToIndex;
+    private int size;
+
+    public OptimizedHeapMinPQ() {
+        items = new ArrayList<>();
+        itemToIndex = new HashMap<>();
+        items.add(new PriorityNode<>(null, 0));
+    }
+    private boolean greater(int i, int j) {
+        return items.get(i).priority() > items.get(j).priority();
+    }
+
+    private void sink(int k) {
+        boolean ok = true;
+        while (2 * k <= size && ok) {
+            int j = 2 * k;
+            if (j < size && greater(j, j+1)) j++;
+            if (!greater(k, j)) { 
+                ok = false;
+            } else {
+                exch(k, j);
+                k = j;
+            }
+        }
+    }
+
+    private void swim(int k) {
+        while (k > 1 && greater(k/2, k)) {
+            exch(k, k/2);
+            k = k/2;
+        }
+    }
+
+    private void exch(int i, int j) {
+        PriorityNode<T> swap = items.get(i);
+        items.set(i, items.get(j));
+        items.set(j, swap);
+        itemToIndex.put(items.get(i).item(), i); // change to the current index in the map
+        itemToIndex.put(swap.item(), j);         // change to the current index in the map
+    }
+
+    public void add(T item, double priority) {
+        // TODO: Your code here!
+        if (contains(item) || item == null) {
+            throw new IllegalArgumentException("Already contains " + item + "or" + item + "is invalid");
+        }
+        items.add(items.size(), new PriorityNode<>(item, priority));
+        size++;
+        itemToIndex.put(item, size);  // put the item-index pair into the map before swim/sink
+        swim(size);
+    }
+
+    public boolean contains(T item) {
+        // TODO: Your code here!
+        return itemToIndex.containsKey(item);
+    }
+
+    public T peekMin() {
+        // TODO: Your code here!
+        if (isEmpty()) {
+            throw new NoSuchElementException("PQ is empty");
+        }
+        return items.get(1).item();
+    }
+
+    public T removeMin() {
+        // TODO: Your code here!
+        if (isEmpty()) {
+            throw new NoSuchElementException("PQ is empty");
+        }
+        exch(1, size);
+        PriorityNode<T> minNode = items.remove(size);
+        itemToIndex.remove(minNode.item());
+        size--;
+        sink(1);
+        return minNode.item();
+    }
+
+    public void changePriority(T item, double priority) {
+        // TODO: Your code here!
+        if (!contains(item)) {
+            throw new NoSuchElementException("PQ does not contain " + item);
+        }
+        int currindex = itemToIndex.get(item);
+        items.get(currindex).setPriority(priority);
+        swim(currindex);
+        sink(itemToIndex.get(item));
+    }
+    
+
+    public int size() {
+        // TODO: Your code here!
+        return size;
+    }
+}
