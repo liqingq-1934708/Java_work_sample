@@ -1,0 +1,59 @@
+import java.util.*;
+
+public class HeapMinPQ<T> implements ExtrinsicMinPQ<T> {
+    private final PriorityQueue<PriorityNode<T>> pq;
+
+    public HeapMinPQ() {
+        pq = new PriorityQueue<>(Comparator.comparingDouble(PriorityNode::priority));
+    }
+
+    public void add(T item, double priority) {
+        // TODO: Your code here!
+        if (contains(item) || item == null) {
+            throw new IllegalArgumentException("Already contains " + item + "or" + item + "is invalid");
+        }
+        pq.add(new PriorityNode<>(item, priority));
+
+    }
+
+    public boolean contains(T item) {
+        // TODO: Your code here!
+        return pq.contains(new PriorityNode<>(item, 0));
+    }
+
+    public T peekMin() {
+        // TODO: Your code here!
+        if (isEmpty()) {
+            throw new NoSuchElementException("PQ is empty");
+        }
+        return firstOf().item();
+    }
+
+    public T removeMin() {
+        // TODO: Your code here!
+        if (isEmpty()) {
+            throw new NoSuchElementException("PQ is empty");
+        }
+        PriorityNode<T> minNode = firstOf();
+        pq.remove(minNode);
+        return minNode.item();
+    }
+
+    public void changePriority(T item, double priority) {
+        // TODO: Your code here!
+        if (!contains(item)) {
+            throw new NoSuchElementException("PQ does not contain " + item);
+        }
+        pq.remove(new PriorityNode<>(item, 0));
+        add(item, priority);      
+    }
+
+    public int size() {
+        // TODO: Your code here!
+        return pq.size();
+    }
+
+    private PriorityNode<T> firstOf() {
+        return pq.iterator().next();
+    }
+}
