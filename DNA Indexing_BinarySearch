@@ -1,0 +1,59 @@
+import java.util.*;
+
+public class BinarySearchAutocomplete implements Autocomplete {
+    private final List<CharSequence> terms;
+
+    public BinarySearchAutocomplete() {
+        this.terms = new ArrayList<>();
+    }
+
+    public void addAll(Collection<? extends CharSequence> terms) {
+        // TODO: Your code here
+        this.terms.addAll(terms);
+        Collections.sort(this.terms, CharSequence::compare);
+    }
+
+    public List<CharSequence> allMatches(CharSequence prefix) {
+        List<CharSequence> result = new ArrayList<>();
+        // TODO: Your code here
+        int sizeP = prefix.length();
+        if (prefix == null || sizeP == 0) {
+            return result;
+        }
+        int low = 0;
+        int high = terms.size() - 1;
+        boolean temp = true;
+
+        while (low <= high && temp) {
+            int mid = low + (high - low) / 2;
+            if (sizeP <= terms.get(mid).length()) {
+                CharSequence part = terms.get(mid).subSequence(0, sizeP);
+                if (CharSequence.compare(prefix, part) < 0) {
+                    high = mid - 1;
+                } else if (CharSequence.compare(prefix, part) > 0) {
+                    low = mid + 1;
+                } else {
+                    temp = false;
+                }
+            } else {
+                if (CharSequence.compare(prefix, terms.get(mid)) < 0) {
+                    high = mid - 1;
+                } else {
+                    low = mid + 1;
+                }
+            }
+        }
+
+        // collects all matching terms in the vicinity
+        for (int i = low; i <= high; i++) {
+            if (sizeP <= terms.get(i).length()) {
+                CharSequence part = terms.get(i).subSequence(0, sizeP);
+                if (CharSequence.compare(prefix, part) == 0) {
+                    result.add(terms.get(i));
+                }
+            }
+        }
+
+        return result;
+    }
+}
