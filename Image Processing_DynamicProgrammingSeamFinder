@@ -1,0 +1,78 @@
+import graphs.Graph;
+
+import java.util.*;
+
+public class DynamicProgrammingSeamFinder implements SeamFinder {
+
+    public List<Integer> findSeam(Picture picture, EnergyFunction f) {
+        // TODO: Your code here!
+        double[][] shortestPath = new double[picture.width()][picture.height()];
+
+        // construct the first column in the 2-D array
+        for (int i = 0; i < picture.height(); i++) {
+            shortestPath[0][i] = f.apply(picture, 0, i);
+        }
+
+        // construct the rest columns of the 2-D array
+        for (int i = 1; i < picture.width(); i++) {
+            for (int j = 0; j < picture.height(); j++) {
+                double min;
+                if (j == 0) {
+                    min = Math.min(shortestPath[i - 1][j], shortestPath[i - 1][j + 1]);
+                } else if (j == picture.height() - 1) {
+                    min = Math.min(shortestPath[i - 1][j], shortestPath[i - 1][j - 1]);
+                } else {
+                    min = Math.min(shortestPath[i - 1][j - 1], shortestPath[i - 1][j]);
+                    min = Math.min(min, shortestPath[i - 1][j + 1]);
+                }
+                shortestPath[i][j] = min + f.apply(picture, i, j);
+            }   
+        }
+
+        List<Integer> result = new ArrayList<>(picture.width());
+        double shortest = shortestPath[picture.width() - 1][0];
+        int y = 0;
+        for (int i = 1; i < picture.height(); i++) {
+            if (shortestPath[picture.width() - 1][i] < shortest) {
+                shortest = shortestPath[picture.width() - 1][i];
+                y = i;
+            }
+        }
+        result.add(y);
+
+        for (int i = picture.width() - 2; i >= 0; i--) {
+            if (y == 0) {
+                if (shortestPath[i][y] < shortestPath[i][y + 1]) {
+                    result.add(y);
+                } else {
+                    result.add(y + 1);
+                    y = y + 1;
+                }
+            } else if (y == picture.height() - 1) {
+                if (shortestPath[i][y] < shortestPath[i][y - 1]) { 
+                    result.add(y);
+                } else { 
+                    result.add(y - 1);
+                    y = y - 1;
+                }
+            } else {
+                double min = shortestPath[i][y - 1];
+                int min_y = y - 1;
+                for (int z = y; z <= y + 1; z++) {
+                    if (shortestPath[i][z] < min) {
+                        min = shortestPath[i][z];
+                        min_y = z;
+                    }
+                }
+                result.add(min_y);
+                y = min_y;
+            }
+
+        }
+
+        Collections.reverse(result);
+
+        return result;
+    }
+}
+
